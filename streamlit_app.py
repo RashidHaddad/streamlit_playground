@@ -114,7 +114,8 @@ if prompt := st.chat_input(placeholder="Who won the Women's U.S. Open in 2018?")
 
     with st.chat_message("assistant"):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-        response = beautify(chat_rag(prompt))
+        answer, sources = chat_rag(prompt)
+        response = beautify(answer, sources)
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.write(response)
 
