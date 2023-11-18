@@ -65,32 +65,31 @@ retriever = vectorstore.as_retriever()
 qa = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
 
 
-
-# def generate_response_pdf(uploaded_file, openai_api_key, query_text):
-#     # Load document if file is uploaded
-#     if uploaded_file is not None:
-#         documents = []
-#         pdf = pypdf.PdfReader(uploaded_file)
-#         for p in range(len(pdf.pages)):
-#             page = pdf.pages[p]
-#             text = page.extract_text()
-#             documents += [text]
-
-#     # documents = loader.load()
-#     # Split documents into chunks
-#     text_splitter=CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-#     texts = text_splitter.create_documents(documents)
-#     # Select embeddings
-#     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-#     # Create a vectorstore from documents
-#     db = Chroma.from_documents(texts, embeddings)
-#     # Create retriever interface
-#     retriever = db.as_retriever()
-#     # Create QA chain
-#     qa = RetrievalQA.from_chain_type(llm=OpenAI(openai_api_key=openai_api_key), chain_type='stuff', retriever=retriever)
-#     return qa.run(query_text)
+map_template = """You are a translator who only translates into English. Output only the translated query.
+Query:{query}"""
 
 
+from langchain.prompts import ChatPromptTemplate
+
+prompt_template = ChatPromptTemplate.from_template(map_template)
+
+chat = ChatOpenAI(temperature=0.0)
+
+def translate(question):
+  messages = prompt_template.format_messages(query=question)
+  response = chat(messages)
+  return response.content
+
+def chat_rag(question):
+  response = translate(question)
+  # print(response)
+  docs= retriever.get_relevant_documents(response)
+  docers = set([i.metadata['source'] for i in docs])
+
+  return qa(response)['answer'], docers
+
+def beautify(answer, sources):
+    return answer + "\n" + "\n".join(sources)
 
 import streamlit as st
 
@@ -113,12 +112,9 @@ if prompt := st.chat_input(placeholder="Who won the Women's U.S. Open in 2018?")
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_api_key, streaming=True)
-    search = DuckDuckGoSearchRun(name="Search")
-    search_agent = initialize_agent([search], llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, handle_parsing_errors=True)
     with st.chat_message("assistant"):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-        response = search_agent.run(st.session_state.messages, callbacks=[st_cb])
+        response = beautify(chat_rag(prompt))
         st.session_state.messages.append({"role": "assistant", "content": response})
         st.write(response)
 
