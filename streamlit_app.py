@@ -40,7 +40,7 @@ apify = ApifyWrapper()
 loader = apify.call_actor(
     actor_id="apify/website-content-crawler",
     run_input={
-        "startUrls": [{"url": "https://www.cit.tum.de/en/cit/studies/students/"}]
+        "startUrls": [{"url": "https://sxu3.github.io/"}]
     },
     dataset_mapping_function=lambda item: Document(
         page_content=item["text"] or "", metadata={"source": item["url"]}
