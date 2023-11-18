@@ -31,7 +31,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
 
 
-os.environ["APIFY_API_TOKEN"] = "apify_api_SAP0d1xFEFs7mylGNKajb3WIcXSxYg3PDKLA"
+# os.environ["APIFY_API_TOKEN"] = "apify_api_SAP0d1xFEFs7mylGNKajb3WIcXSxYg3PDKLA"
 # os.environ["OPENAI_API_KEY"] = "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"
 
 
@@ -98,7 +98,6 @@ query_text = st.text_input('Enter your question:', placeholder = 'How many credi
 # Form input and query
 result = []
 with st.form('myform', clear_on_submit=True):
-    openai_api_key = "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"
     submitted = st.form_submit_button('Submit', disabled=not(query_text))
     if submitted and openai_api_key.startswith('sk-'):
         with st.spinner('Calculating...'):
