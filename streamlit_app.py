@@ -29,7 +29,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
-
+from langchain.vectorstores import FAISS
 
 # os.environ["APIFY_API_TOKEN"] = "apify_api_SAP0d1xFEFs7mylGNKajb3WIcXSxYg3PDKLA"
 # os.environ["OPENAI_API_KEY"] = "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"
