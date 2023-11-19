@@ -36,7 +36,7 @@ from langchain.vectorstores import FAISS
 
 embeddings = HuggingFaceEmbeddings()
 
-vector_store = FAISS.load_local("faiss_index", embeddings)
+vectorstore = FAISS.load_local("faiss_index", embeddings)
 
 llm = ChatOpenAI()
 memory = ConversationSummaryMemory(
