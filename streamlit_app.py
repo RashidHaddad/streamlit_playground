@@ -68,7 +68,7 @@ def chat_rag(question):
   docs= retriever.get_relevant_documents(response)
   docers = set([i.metadata['source'] for i in docs])
 
-  return qa(response)['answer'], docers
+  return qa(question)['answer'], docers
 
 def beautify(answer, sources):
     return answer + "\n" + "\n".join(sources)
