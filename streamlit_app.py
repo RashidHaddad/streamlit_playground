@@ -34,27 +34,9 @@ from langchain.tools import DuckDuckGoSearchRun
 # os.environ["APIFY_API_TOKEN"] = "apify_api_SAP0d1xFEFs7mylGNKajb3WIcXSxYg3PDKLA"
 # os.environ["OPENAI_API_KEY"] = "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"
 
+embeddings = HuggingFaceEmbeddings()
 
-apify = ApifyWrapper()
-# Call the Actor to obtain text from the crawled webpages
-loader = apify.call_actor(
-    actor_id="apify/website-content-crawler",
-    run_input={
-        "startUrls": [{"url": "https://sxu3.github.io/"}]
-    },
-    dataset_mapping_function=lambda item: Document(
-        page_content=item["text"] or "", metadata={"source": item["url"]}
-    ),
-)
-
-data = loader.load()
-
-
-
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
-all_splits = text_splitter.split_documents(data)
-
-vectorstore = Chroma.from_documents(documents=all_splits, embedding=HuggingFaceEmbeddings())
+vector_store = FAISS.load_local("faiss_index", embeddings)
 
 llm = ChatOpenAI()
 memory = ConversationSummaryMemory(
@@ -98,21 +80,58 @@ from langchain.callbacks import StreamlitCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
 
-st.title("🔎 LangChain - Chat with search")
+# st.title("🔎 LangChain - Chat with search")
+company_logo = 'https://de.wikipedia.org/wiki/Datei:Logo_of_the_Technical_University_of_Munich.svg'
+# Configure Streamlit page
+st.set_page_config(
+    page_title="TUM GPT",
+    page_icon=company_logo
+)
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
-        {"role": "assistant", "content": "Hi, I'm a chatbot who can search the web. How can I help you?"}
+        {"role": "assistant", "content": "Hi, I'm a TUM Bot who can help you with your TUM queries. How can I help you?"}
     ]
 
-for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg["content"])
+# for msg in st.session_state.messages:
+#     st.chat_message(msg["role"]).write(msg["content"])
 
-if prompt := st.chat_input(placeholder="Who won the Women's U.S. Open in 2018?"):
+for message in st.session_state.messages:
+    if message["role"] == 'assistant':
+        with st.chat_message(message["role"], avatar=company_logo):
+            st.markdown(message["content"])
+    else:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+# if query := st.chat_input("Ask me anything"):
+#     # Add user message to chat history
+#     st.session_state.messages.append({"role": "user", "content": query})
+#     # Display user message in chat message container
+#     with st.chat_message("user"):
+#         st.markdown(query)
+#     with st.chat_message("assistant", avatar=company_logo):
+#         message_placeholder = st.empty()
+#         # Send user's question to our chain
+#         result = chain({"question": query})
+#         response = result['answer']
+#         full_response = ""
+#         # Simulate stream of response with milliseconds delay
+#         for chunk in response.split():
+#             full_response += chunk + " "
+#             time.sleep(0.05)
+#             # Add a blinking cursor to simulate typing
+#             message_placeholder.markdown(full_response + "▌")
+#         message_placeholder.markdown(full_response)
+#     # Add assistant message to chat history
+#     st.session_state.messages.append({"role": "assistant", "content": response})
+
+
+if prompt := st.chat_input(placeholder="Ask anything about TUM?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar=company_logo):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
         answer, sources = chat_rag(prompt)
         response = beautify(answer, sources)
