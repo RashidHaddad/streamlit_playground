@@ -29,7 +29,7 @@ from langchain.agents import initialize_agent, AgentType
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
-
+from langchain.vectorstores import FAISS
 
 apify = ApifyWrapper()
 # Call the Actor to obtain text from the crawled webpages
