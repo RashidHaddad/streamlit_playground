@@ -81,7 +81,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.tools import DuckDuckGoSearchRun
 
 # st.title("🔎 LangChain - Chat with search")
-company_logo = 'https://de.wikipedia.org/wiki/Datei:Logo_of_the_Technical_University_of_Munich.svg'
+company_logo = 'logo.png'
 # Configure Streamlit page
 st.set_page_config(
     page_title="TUM GPT",
